@@ -1,0 +1,37 @@
+#!/bin/bash
+# Nautilus script to create a desktop shortcut for the selected executable
+
+# Get the full path of the selected file
+FILE_PATH=$(readlink -f "$1")
+
+# Check if the selected file is executable
+if [ -x "$FILE_PATH" ]; then
+    # Extract the filename without the path
+    FILE_NAME=$(basename "$FILE_PATH")
+
+    # Define the desktop entry content
+    DESKTOP_ENTRY="[Desktop Entry]
+Version=1.0
+Name=$FILE_NAME
+Comment=Launch $FILE_NAME
+Exec='$FILE_PATH'
+Terminal=false
+Type=Application
+Categories=Utility;"
+
+    # Define the path to the new desktop shortcut
+    DESKTOP_PATH="$HOME/Desktop/$FILE_NAME.desktop"
+
+    # Create the desktop shortcut
+    echo "$DESKTOP_ENTRY" > "$DESKTOP_PATH"
+
+    # Make the desktop shortcut executable
+    chmod +x "$DESKTOP_PATH"
+
+    # Mark the file as trusted so that it launches without prompting "Allow Launching"
+    gio set -t string "$DESKTOP_PATH" metadata::trusted "true"
+
+    echo "Desktop shortcut for $FILE_NAME created on the desktop."
+else
+    echo "The selected file is not executable."
+fi
